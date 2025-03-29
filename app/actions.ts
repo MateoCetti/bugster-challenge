@@ -132,3 +132,34 @@ export const signOutAction = async () => {
   await supabase.auth.signOut();
   return redirect("/sign-in");
 };
+
+
+export const sendIdea = async(formData : FormData) => {
+  const idea = formData.get("idea")?.toString();
+  let judgement = {};
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: `La siguiente idea fue otorgada por un usuario. Deberas clasificar la misma como "idea millonaria" o "Estafa piramidal" dependiendo si encaja en una de estas dos categorias según su definición. responde con humor.
+            
+            Idea: ${idea}` }]
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    judgement = data.candidates[0].content;
+    return judgement.parts[0].text
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
