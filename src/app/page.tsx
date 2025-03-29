@@ -13,11 +13,20 @@ export default function Home() {
         </div>
       </nav>
       <main className="p-6 h-full bg-green-200 flex flex-col">
-        <h1 className="justify-self-start text-5xl w-full text-center">¿MILLONARIA o PIRAMIDAL? 🤔</h1>
+        <h1 className="text-5xl w-full text-center">💡 Idea Millonaria o Estafa Piramidal? ¡Descúbrelo! 💰🚀</h1>
+        <p className="mx-auto my-2">
+          Escribe tu idea y nuestra Inteligencia Artificial la analizará 👓. Recibirás un veredicto brutalmente honesto:
+        </p>
+        <b className="mx-auto my-2 text-xl">
+        🤑 "Idea Millonaria" o 🏴‍☠️ "Estafa Piramidal".
+        </b>
+        <p className="mx-auto my-2">
+          ¡Evita fraudes y encuentra la próxima gran oportunidad! 😎
+        </p>
         <section className="flex flex-col flex-grow items-center justify-center h-auto bg-blue-200">
           <label htmlFor="" className="">Escribe tu idea</label>
-          <textarea id="" className="w-full max-w-lg p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={PLACEHOLDER_TEXT}></textarea>
-          <button className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 w-100">Enviar idea</button>
+          <textarea id="" className=" bg-white w-full h-52 max-w-lg p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={PLACEHOLDER_TEXT}></textarea>
+          <button className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 w-100">Veredicto!</button>
         </section>
       </main>
     </div>
