@@ -10,7 +10,8 @@ export function FormIdea() {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         const formData = new FormData(e.target as HTMLFormElement);
-        setMensaje(await sendIdea(formData));
+        const response = await sendIdea(formData)
+        setMensaje(response?.message)
     }
     return (
         <form className="flex-1 w-full flex flex-col gap-12" onSubmit={(e) => handleSubmit(e)}>
