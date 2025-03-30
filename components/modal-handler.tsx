@@ -9,6 +9,6 @@ export default function modalHandler({ }) {
     return (
         <>
             <Button variant={"default"} onClick={() => setIsOpen(!isOpen)}>Conviertete en PRO</Button>
-            <CheckoutModal onClose={() => setIsOpen} open={isOpen}></CheckoutModal>
+            <CheckoutModal onClose={() => setIsOpen(false)} open={isOpen}></CheckoutModal>
         </>);
 }
