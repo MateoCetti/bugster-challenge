@@ -9,7 +9,10 @@ export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
   const supabase = await createClient();
-  const origin = (await headers()).get("origin");
+  const isProduction = process.env.VERCEL_URL;
+  const origin = isProduction
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000"; // Ajusta la URL según el entorno de desarrollo
 
   if (!email || !password) {
     return encodedRedirect(
