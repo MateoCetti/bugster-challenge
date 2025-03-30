@@ -163,3 +163,25 @@ export const sendIdea = async(formData : FormData) => {
     console.error("Error:", error);
   }
 }
+
+export async function updateUserPlan() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: "Usuario no autenticado" };
+  }
+
+  const { error: updateError } = await supabase.auth.admin.updateUserById(user.id, {
+    user_metadata: { plan: "pro" },
+  });
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+  return { success: true };
+}
