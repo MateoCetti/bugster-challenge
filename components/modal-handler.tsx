@@ -2,12 +2,13 @@
 
 import { useState } from "react"
 import CheckoutModal from "./checkout";
+import { Button } from "./ui/button";
 
 export default function modalHandler({ }) {
     const [isOpen, setIsOpen] = useState<boolean>(false)
     return (
         <>
-            <button onClick={() => setIsOpen(!isOpen)}>{isOpen ? "True" : "False"}</button>
-            <CheckoutModal onClose={() => setIsOpen(false)} open={isOpen}></CheckoutModal>
+            <Button variant={"default"} onClick={() => setIsOpen(!isOpen)}>Conviertete en PRO</Button>
+            <CheckoutModal onClose={() => setIsOpen} open={isOpen}></CheckoutModal>
         </>);
 }
