@@ -6,12 +6,14 @@ import { useState } from "react";
 
 export function FormIdea() {
     const [mensaje, setMensaje] = useState("");
-    
+
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         const formData = new FormData(e.target as HTMLFormElement);
         const response = await sendIdea(formData)
-        setMensaje(response?.message)
+        if (response) {
+            setMensaje(response?.message)
+        }
     }
     return (
         <form className="flex-1 w-full flex flex-col gap-12" onSubmit={(e) => handleSubmit(e)}>

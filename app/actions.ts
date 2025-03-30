@@ -134,9 +134,26 @@ export const signOutAction = async () => {
 };
 
 
-export const sendIdea = async(formData : FormData) => {
+export const sendIdea = async (formData: FormData) => {
   const idea = formData.get("idea")?.toString();
-  let judgement = {};
+
+  const supabase = await createClient();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    console.error("Error obteniendo el usuario:", userError?.message);
+    return { message: "Error obteniendo el usuario." };
+  }
+
+  const consumptions = await getConsumptions();
+  if (typeof (consumptions) !== "number") {
+    return { message: consumptions.message };
+  }
+
+  if (user.user_metadata.plan !== "pro" && consumptions > 0) {
+    return { message: "Haz alcanzado tu limite diario. Si quieres volver a probar conviertete en PRO!" }
+  }
+
+  let judgement = "";
   try {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: "POST",
@@ -145,9 +162,11 @@ export const sendIdea = async(formData : FormData) => {
       },
       body: JSON.stringify({
         contents: [{
-          parts: [{ text: `La siguiente idea fue otorgada por un usuario. Deberas clasificar la misma como "idea millonaria" o "Estafa piramidal" dependiendo si encaja en una de estas dos categorias según su definición. responde con humor.
+          parts: [{
+            text: `La siguiente idea fue otorgada por un usuario. Deberas clasificar la misma como "idea millonaria" o "Estafa piramidal" dependiendo si encaja en una de estas dos categorias según su definición. responde con humor.
             
-            Idea: ${idea}` }]
+            Idea: ${idea}`
+          }]
         }]
       })
     });
@@ -156,9 +175,10 @@ export const sendIdea = async(formData : FormData) => {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
+    logConsumption()
     const data = await response.json();
-    judgement = data.candidates[0].content;
-    return judgement.parts[0].text
+    judgement = data.candidates[0].content.parts[0].text;
+    return { message: judgement }
   } catch (error) {
     console.error("Error:", error);
   }
@@ -184,4 +204,62 @@ export async function updateUserPlan() {
     return { error: updateError.message };
   }
   return { success: true };
+}
+
+export async function logConsumption() {
+  const supabase = await createClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    console.error("Error obteniendo el usuario:", userError?.message);
+    return;
+  }
+
+  const { error } = await supabase.from("consumption").insert({});
+
+  if (error) {
+    console.error("Error al registrar consumo:", error.message);
+  } else {
+    console.log("Consumo registrado!");
+  }
+}
+
+export async function getConsumptions() {
+  const supabase = await createClient();
+
+  // Obtener el ID del usuario actual desde la sesión
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { message: 'Usuario no autenticado' };
+  }
+
+  const userId = user.id;
+
+  const today = new Date();
+
+  // Establecer el inicio y fin del día (en UTC)
+  const startOfDay = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 0, 0, 0)); // 00:00:00 UTC
+  const endOfDay = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 23, 59, 59, 999)); // 23:59:59.999 UTC
+
+  // Convertir a formato ISO (UTC) para la comparación correcta
+  const startOfDayISOString = startOfDay.toISOString();
+  const endOfDayISOString = endOfDay.toISOString();
+
+  // Consultar el conteo de consumptions para el usuario hoy
+
+  let { count, error } = await supabase
+    .from('consumption')
+    .select('id', { count: "exact" })
+    .eq("user_id", userId)
+    .gte('created_at', startOfDayISOString)  // Mayor o igual a 00:00:00 UTC
+    .lte('created_at', endOfDayISOString);
+  if (error) {
+    console.log(error)
+    return { message: 'Error al consultar las consumptions', error };
+  }
+  if (count === null) {
+    return { message: 'Error' };
+  }
+  return count;
 }
